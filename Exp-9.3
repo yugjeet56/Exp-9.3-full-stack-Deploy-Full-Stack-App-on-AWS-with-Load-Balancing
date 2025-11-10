@@ -1,0 +1,66 @@
+Backend — backend/server.js
+============================
+
+const express = require('express');
+const cors = require('cors');
+const app = express();
+const PORT = process.env.PORT || 3000;
+app.use(cors());
+app.use(express.json());
+app.get('/api/message', (req, res) => {
+res.json({ message: 'Hello from backend instance', time: new Date().toISOString() });
+});
+app.get('/health', (req, res) => {
+res.status(200).send('OK');
+});
+app.get('/api/id', (req, res) => {
+res.json({ instance: process.env.INSTANCE_ID || 'local' });
+});
+app.listen(PORT, () => {
+console.log(Backend listening on port ${PORT});
+});
+
+
+Frontend — simple static frontend/index.html
+=============================================
+
+<!-- index.html -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Fullstack App - Load Balanced Backend</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+body { font-family: Arial, sans-serif; background: linear-gradient(135deg,#3b3b98,#6a11cb); color: white; min-height:100vh; display:flex; align-items:center; justify-content:center; }
+.card { background: rgba(255,255,255,0.06); padding:28px; border-radius:12px; width:640px; box-shadow:0 8px 30px rgba(0,0,0,0.3); }
+h1{ margin:0 0 10px }
+button{ padding:10px 16px; margin-top:12px; border-radius:8px; border:none; cursor:pointer }
+</style>
+</head>
+<body>
+<div class="card">
+<h1>Fullstack App (Frontend)</h1>
+<p>Click to fetch message from backend (load-balanced)</p>
+<div>
+<button id="btn">Fetch from API</button>
+<pre id="out" style="background:rgba(0,0,0,0.2); padding:12px; border-radius:6px; margin-top:12px;"></pre>
+</div>
+</div>
+<script>
+const btn = document.getElementById('btn');
+const out = document.getElementById('out');
+const BACKEND_BASE = '/api';
+btn.addEventListener('click', async () => {
+out.textContent = 'Loading...';
+try {
+const r = await fetch(BACKEND_BASE + '/message');
+const j = await r.json();
+out.textContent = JSON.stringify(j, null, 2);
+} catch (err) {
+out.textContent = 'Error: ' + err.message;
+}
+});
+</script>
+</body>
+</html>
